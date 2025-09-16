@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "https://event-qr-backend.onrender.com/api";
 
 export const registerUser = (data: any) => axios.post(`${API_URL}/auth/register`, data);
 export const registerGoogle = (data: any) => axios.post(`${API_URL}/auth/google`, data);
