@@ -8,8 +8,8 @@ const Home = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Always generate QR with current deployed origin
-    const origin = window.location.origin; 
+    // Always use the deployed origin dynamically
+    const origin = window.location.origin;
     setAppUrl(`${origin}/event`);
   }, []);
 
@@ -22,13 +22,7 @@ const Home = () => {
       <Heading mb={4} size="2xl" textAlign="center">
         Tech Event 2025
       </Heading>
-      <Text
-        mb={8}
-        textAlign="center"
-        maxW="450px"
-        fontSize="lg"
-        color="gray.600"
-      >
+      <Text mb={8} textAlign="center" maxW="450px" fontSize="lg" color="gray.600">
         Join us for an amazing technology event! Innovate, Learn, Connect.
       </Text>
 
