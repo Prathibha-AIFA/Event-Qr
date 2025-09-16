@@ -75,7 +75,7 @@ const Register = () => {
       if (err.response?.data?.msg === "User already exists") {
         toast({
           title: "User Already Exists",
-          description: "Please log in instead.",
+          description: "Try another mail",
           status: "info",
           position: "top-right",
         });
