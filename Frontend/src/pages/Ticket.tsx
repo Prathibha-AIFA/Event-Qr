@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import axios from "axios";
-import { Box, Center, Heading, Text, VStack } from "@chakra-ui/react";
+import { Box, Center, Heading, Image, Text, VStack } from "@chakra-ui/react";
 
 interface ITicket {
   _id: string;
   eventId: string;
+  qrCodeData?: string;
+  qrCodeUrl?: string;
   userId?: {
     name: string;
     email: string;
@@ -16,25 +18,24 @@ interface ITicket {
 
 const Ticket = () => {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const [ticket, setTicket] = useState<ITicket | null>(null);
+
+  // check query param ?showQR=true
+  const queryParams = new URLSearchParams(location.search);
+  const showQR = queryParams.get("showQR") === "true";
 
   useEffect(() => {
     const fetchTicket = async () => {
-      console.log(`[Ticket Page] Fetching ticket for ID: ${id}`);
       try {
         const res = await axios.get(
           `https://event-qr-backend.onrender.com/api/tickets/${id}`
         );
-        console.log("[Ticket Page] API response:", res.data);
         setTicket(res.data);
       } catch (err: any) {
-        console.error(
-          "[Ticket Page] Failed to fetch ticket:",
-          err.response?.data || err.message
-        );
+        console.error("Failed to fetch ticket:", err.response?.data || err.message);
       }
     };
-
     if (id) fetchTicket();
   }, [id]);
 
@@ -63,26 +64,37 @@ const Ticket = () => {
           textAlign="center"
           maxW="400px"
         >
-          <Text fontWeight="bold" fontSize="lg" mb={2}>
-            Event: {ticket.eventId}
-          </Text>
-          <Text fontSize="md" mb={1}>
-            👤 Name: {userName}
-          </Text>
-          <Text fontSize="md" mb={4}>
-            ✉️ Email: {userEmail}
-          </Text>
-
-          <Text fontSize="sm" color="gray.500">
-            Ticket ID: {ticket._id}
-          </Text>
-
-          <Box mt={6} p={4} bg="blue.50" rounded="md">
-            <Text fontSize="md" color="blue.800">
-              ✅ Please present this ticket at the entry desk.  
-              <br />Welcome to <strong>Tech Event 2025</strong> 🚀
-            </Text>
-          </Box>
+          {showQR ? (
+            // ✅ Mode 1: Show QR code (when redirected after login)
+            <>
+              <Image
+                src={ticket.qrCodeData || ticket.qrCodeUrl}
+                alt="QR Code"
+                boxSize="250px"
+                objectFit="contain"
+                mb={6}
+              />
+              <Text fontSize="sm" color="gray.500">
+                Scan this QR to access your ticket details
+              </Text>
+            </>
+          ) : (
+            // ✅ Mode 2: Show details (when QR is scanned in mobile)
+            <>
+              <Text fontWeight="bold" fontSize="lg" mb={2}>
+                Event: {ticket.eventId}
+              </Text>
+              <Text fontSize="md" mb={1}>
+                👤 Name: {userName}
+              </Text>
+              <Text fontSize="md" mb={4}>
+                ✉️ Email: {userEmail}
+              </Text>
+              <Text fontSize="sm" color="gray.500">
+                Ticket ID: {ticket._id}
+              </Text>
+            </>
+          )}
         </Box>
       </VStack>
     </Center>
