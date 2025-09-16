@@ -24,7 +24,7 @@ const Ticket = () => {
     const fetchTicket = async () => {
       console.log(`[Ticket Page] Fetching ticket for ID: ${id}`);
       try {
-        const res = await axios.get(`http://localhost:5000/api/tickets/${id}`);
+        const res = await axios.get(`https://event-qr-backend.onrender.com/api/tickets/${id}`);
         console.log("[Ticket Page] API response:", res.data);
         setTicket(res.data);
       } catch (err: any) {

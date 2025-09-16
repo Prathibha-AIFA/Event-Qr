@@ -92,7 +92,7 @@ const Register = () => {
 
   // ----------------- Google OAuth -----------------
 const handleGoogleSignIn = () => {
-  const origin = window.location.origin; // dynamically get current frontend origin
+  const origin = window.location.origin; 
   window.location.href = `https://event-qr-backend.onrender.com/google?origin=${encodeURIComponent(origin)}`;
 };
 
