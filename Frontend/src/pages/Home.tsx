@@ -1,26 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Heading, Text, Center, Button } from "@chakra-ui/react";
 import QRCode from "react-qr-code";
 import { useNavigate } from "react-router-dom";
 
 const Home = () => {
-  const [appUrl, setAppUrl] = useState<string>(window.location.origin);
-  const navigate = useNavigate()
+  const [appUrl, setAppUrl] = useState<string>("");
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Attempt to use local network IP for mobile devices
-    const getLocalNetworkURL = () => {
-      // Replace with your network IP and port if needed
-      const localIP = "192.168.1.100"; // change this to your PC's IP
-      const port = window.location.port || "3000";
-      setAppUrl(`http://${localIP}:${port}/event`);
-    };
-
-    getLocalNetworkURL();
+    // Always generate QR with current deployed origin
+    const origin = window.location.origin; 
+    setAppUrl(`${origin}/event`);
   }, []);
 
   const handleNavigate = () => {
-    navigate('/event')
+    navigate("/event");
   };
 
   return (
@@ -28,7 +22,13 @@ const Home = () => {
       <Heading mb={4} size="2xl" textAlign="center">
         Tech Event 2025
       </Heading>
-      <Text mb={8} textAlign="center" maxW="450px" fontSize="lg" color="gray.600">
+      <Text
+        mb={8}
+        textAlign="center"
+        maxW="450px"
+        fontSize="lg"
+        color="gray.600"
+      >
         Join us for an amazing technology event! Innovate, Learn, Connect.
       </Text>
 
@@ -41,7 +41,7 @@ const Home = () => {
         flexDirection="column"
         alignItems="center"
       >
-        <QRCode value={appUrl} size={180} />
+        {appUrl && <QRCode value={appUrl} size={180} />}
 
         <Text mt={4} textAlign="center" fontSize="sm" color="gray.500">
           Scan this QR code with your mobile to join the event.
