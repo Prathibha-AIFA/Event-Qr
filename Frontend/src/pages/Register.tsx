@@ -90,11 +90,43 @@ const Register = () => {
     }
   };
 
-  // ----------------- Google OAuth -----------------
+
 const handleGoogleSignIn = () => {
-  const origin = window.location.origin; 
-  window.location.href = `https://event-qr-backend.onrender.com/google?origin=${encodeURIComponent(origin)}`;
+  const origin = window.location.origin;
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
+  const popup = window.open(
+    `${BACKEND_URL}/google?origin=${encodeURIComponent(origin)}`,
+    "googlePopup",
+    "width=500,height=600,top=100,left=100,scrollbars=yes,resizable=yes"
+  );
+
+  // Listen for message from popup (after successful auth)
+  window.addEventListener("message", (event) => {
+    if (event.origin !== `${BACKEND_URL}`) return;
+
+    const { success, ticketId, msg } = event.data;
+
+    if (success && ticketId) {
+      toast({
+        title: "Signed in with Google",
+        description: "QR code sent to your email!",
+        status: "success",
+        position: "top-right",
+      });
+      navigate(`/ticket/${ticketId}`);
+      popup?.close();
+    } else if (msg) {
+      toast({
+        title: "Google Sign-in Failed",
+        description: msg,
+        status: "error",
+        position: "top-right",
+      });
+    }
+  });
 };
+
 
 
   return (

@@ -27,9 +27,11 @@ const Ticket = () => {
 
   useEffect(() => {
     const fetchTicket = async () => {
+
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
       try {
         const res = await axios.get(
-          `https://event-qr-backend.onrender.com/api/tickets/${id}`
+          `${BACKEND_URL}/api/tickets/${id}`
         );
         setTicket(res.data);
       } catch (err: any) {
@@ -65,7 +67,7 @@ const Ticket = () => {
           maxW="400px"
         >
           {showQR ? (
-            // ✅ Mode 1: Show QR code (when redirected after login)
+            //  Mode 1: Show QR code (when redirected after login)
             <>
               <Image
                 src={ticket.qrCodeData || ticket.qrCodeUrl}
@@ -79,7 +81,7 @@ const Ticket = () => {
               </Text>
             </>
           ) : (
-            // ✅ Mode 2: Show details (when QR is scanned in mobile)
+            //  Mode 2: Show details (when QR is scanned in mobile)
             <>
               <Text fontWeight="bold" fontSize="lg" mb={2}>
                 Event: {ticket.eventId}
