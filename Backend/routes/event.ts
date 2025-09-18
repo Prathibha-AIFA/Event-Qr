@@ -2,12 +2,15 @@ import { Router } from "express";
 const router = Router();
 
 // You can extend this later to fetch multiple events
-router.get("/", (req, res) => {
-  res.json({
+ import { Request, Response } from "express";
+
+ router.get("/", (Requestreq: Request, res: Response)=>{
+res.json({
     id: "tech2025",
     title: "Tech Event 2025",
     description: "Explore new technologies, network with peers, and gain insights."
   });
-});
+ })
+
 
 export default router;
