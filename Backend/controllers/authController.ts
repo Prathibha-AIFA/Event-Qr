@@ -3,96 +3,167 @@ import User from "../models/User";
 import Ticket from "../models/Tickets";
 import { generateQR } from "../utils/generateQR";
 import { sendEmail } from "../utils/sendEmail";
-import { oauth2Client } from "../config/google";
-import { google } from "googleapis";
+import { OAuth2Client } from "google-auth-library";
+import fs from "fs";
+import path from "path";
 
-export const googleAuth = (req: Request, res: Response) => {
-  const url = oauth2Client.generateAuthUrl({
-    access_type: "offline",
-    scope: ["profile", "email"],
-    prompt: "consent",
-  });
-  res.redirect(url);
-};
+interface Admin {
+  name: string;
+  email: string;
+  password: string;
+}
 
-export const googleCallback = async (req: Request, res: Response) => {
-  const code = req.query.code as string;
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID); 
+
+export const googleLogin = async (req: any, res: any) => {
+  const { token } = req.body; // receive Google JWT token from frontend
   const origin = process.env.FRONTEND_URL || "http://localhost:5173";
 
   try {
-    const { tokens } = await oauth2Client.getToken(code);
-    oauth2Client.setCredentials(tokens);
+    // Verify token
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
 
-    const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
-    const userInfo = await oauth2.userinfo.get();
-    const { email, name, id: googleId } = userInfo.data;
+    const payload = ticket.getPayload();
+    if (!payload?.email || !payload.name) {
+      return res.status(400).json({ msg: "Invalid token" });
+    }
 
-    if (!email || !name) return res.status(400).send("Failed to get user info");
+    // Find or create user
+    let user = await User.findOne({ email: payload.email });
+    if (!user) user = await User.create({ name: payload.name, email: payload.email, googleId: payload.sub });
 
-    let user = await User.findOne({ email });
-    if (!user) user = await User.create({ name, email, googleId });
+    // Find or create ticket for this event
+    let ticketDoc = await Ticket.findOne({ userId: user._id, eventId: "tech2025" });
+    let isNewTicket = false;
 
-    const ticket = new Ticket({ userId: user._id, eventId: "tech2025" });
-    const ticketUrl = `${origin}/ticket/${ticket._id}`;
-    ticket.qrCodeData = await generateQR(ticketUrl);
-    await ticket.save();
+    if (!ticketDoc) {
+      ticketDoc = new Ticket({ userId: user._id, eventId: "tech2025" });
+      const ticketUrl = `${origin}/ticket/${ticketDoc._id}`;
+      ticketDoc.qrCodeData = await generateQR(ticketUrl);
+      await ticketDoc.save();
+      isNewTicket = true;
 
-    await sendEmail(
-      user.email,
-      "Your Tech Event Ticket",
-      `<h2>Hello ${user.name}</h2><p>Your ticket is ready</p>`
-    );
+      // Send email only if ticket is new
+      await sendEmail(
+        user.email,
+        "Your Tech Event Ticket",
+        `<h2>Hello ${user.name}</h2>
+        <p>Your ticket is ready</p>
+        <img src="${ticketDoc.qrCodeData}" alt="Your Ticket QR Code" />
+        <p>Or click here to view online: <a href="${ticketUrl}">${ticketUrl}</a></p>`
+      );
+    }
 
-    res.send(`
-      <script>
-        window.opener.postMessage(
-          { success: true, ticketId: "${ticket._id}" },
-          "${origin}"
-        );
-        window.close();
-      </script>
-    `);
-  } catch (err) {
-    console.error("[ERROR] Google OAuth callback error:", err);
-    res.send(`
-      <script>
-        window.opener.postMessage(
-          { success: false, msg: "Authentication failed" },
-          "${origin}"
-        );
-        window.close();
-      </script>
-    `);
+    // Return JSON response to frontend
+    res.status(200).json({
+      ticketId: ticketDoc._id,
+      message: isNewTicket ? "Ticket created & sent via email" : "Existing ticket",
+    });
+  } catch (err: any) {
+    console.error("[ERROR] Google login:", err);
+    res.status(500).json({ msg: err.message || "Server error" });
   }
 };
 
 export const manualRegister = async (req: Request, res: Response) => {
-  const { name, email } = req.body;
-  const origin = (req.query.origin as string) || process.env.FRONTEND_URL;
-
   try {
+    const { name, email } = req.body;
+    console.log("[DEBUG] Received manual register request:", { name, email });
+
+    // Check if user exists
     let user = await User.findOne({ email });
-    if (user) return res.status(400).json({ msg: "User already exists" });
+    console.log("[DEBUG] Existing user check:", user);
+    if (user) {
+      console.log("[DEBUG] User already exists, aborting registration");
+      return res.status(400).json({ msg: "User already exists" });
+    }
 
-    user = await User.create({ name, email, googleId: "manual-registration" });
+    // Create user
+    user = await User.create({ name, email });
+    console.log("[DEBUG] Created new user:", user);
 
-    const ticket = new Ticket({ userId: user._id, eventId: "tech2025" });
-    const ticketUrl = `${origin}/ticket/${ticket._id}`;
+    // Create ticket
+    const ticket = new Ticket({
+      userId: user._id,
+      eventId: "tech2025",
+      qrCodeData: "", // placeholder if you generate later
+    });
+    console.log("[DEBUG] Ticket object created (before QR generation):");
+
+    // Generate QR code
+    const ticketUrl = `${req.headers.origin}/ticket/${ticket._id}`;
+    console.log("[DEBUG] Ticket URL for QR:", ticketUrl);
     ticket.qrCodeData = await generateQR(ticketUrl);
-    await ticket.save();
+    console.log("[DEBUG] Generated QR code data:");
 
+    // Save ticket
+    await ticket.save();
+    console.log("[DEBUG] Ticket saved successfully:");
+
+    // Send email
     await sendEmail(
       user.email,
       "Your Tech Event Ticket",
-      `<h2>Hello ${user.name}</h2><p>Your ticket is ready</p>`
+      `<h2>Hello ${user.name}</h2><p>Your ticket is ready</p>
+      <img src="${ticket.qrCodeData}" alt="Your Ticket QR Code" />
+    <p>Or click here to view online: <a href="${ticketUrl}">${ticketUrl}</a></p>`
     );
+    console.log("[DEBUG] Email sent successfully to:", user.email);
 
+    // Send response
     res.status(201).json({
-      ticket: { _id: ticket._id, name: user.name, email: user.email },
+      ticket: {
+        _id: ticket._id,
+        name: user.name,
+        email: user.email,
+        qrCodeData: ticket.qrCodeData,
+      },
       redirect: ticketUrl,
     });
-  } catch (err) {
-    console.error("[ERROR] Manual registration error:", err);
-    res.status(500).json({ msg: "Server error" });
+    console.log("[DEBUG] Response sent successfully");
+
+  } catch (err: any) {
+    console.error("[ERROR] manualRegister error:", err);
+    res.status(500).json({ msg: err.message || "Server error" });
   }
 };
+
+
+export const adminLogin = (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  // Step 1: Check if email and password are provided
+  if (!email || !password) {
+    return res.status(400).json({ msg: "Email and password are required" });
+  }
+
+  // Step 2: Read admin data from db.json
+  const dbPath = path.join(__dirname, "../db.json");
+  const rawData = fs.readFileSync(dbPath, "utf-8");
+  const data = JSON.parse(rawData);
+  const admins: Admin[] = data.admins;
+
+  // Step 3: Find matching admin
+  const matchedAdmin = admins.find(
+    (admin) => admin.email === email && admin.password === password
+  );
+
+  // Step 4: Respond based on match
+  if (matchedAdmin) {
+    return res.status(200).json({
+      msg: "Login successful",
+      admin: {
+        name: matchedAdmin.name,
+        email: matchedAdmin.email,
+      },
+    });
+  } else {
+    return res.status(401).json({ msg: "Invalid credentials" });
+  }
+};
+
+
+

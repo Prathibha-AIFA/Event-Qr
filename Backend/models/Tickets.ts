@@ -3,7 +3,7 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface ITicket extends Document {
   userId: Schema.Types.ObjectId;
   eventId: string;
-  qrCodeData: string;
+  qrCodeData: "";
 }
 
 const TicketSchema: Schema = new Schema({

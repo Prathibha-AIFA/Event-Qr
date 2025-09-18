@@ -36,7 +36,7 @@ const EventPage = () => {
           colorScheme="blue"
           size="lg"
           onClick={() => navigate("/register")}
-          _hover={{ bg: "blue.600" }}
+          _hover={{ bg: "red.600" }}
         >
           Register Now
         </Button>

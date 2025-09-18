@@ -8,7 +8,7 @@ const Home = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Always use the deployed origin dynamically
+    
     const origin = window.location.origin;
     setAppUrl(`${origin}/event`);
   }, []);
@@ -43,9 +43,9 @@ const Home = () => {
 
         <Button
           mt={6}
-          colorScheme="blue"
+          colorScheme="red"
           onClick={handleNavigate}
-          _hover={{ bg: "blue.600" }}
+          _hover={{ bg: "red.600" }}
         >
           Join Event (Laptop)
         </Button>

@@ -1,10 +1,11 @@
 import { Router } from "express";
-import { googleAuth, googleCallback, manualRegister } from "../controllers/authController";
+import {  adminLogin, manualRegister, googleLogin } from "../controllers/authController";
 
 const router = Router();
 
-router.get("/google", googleAuth);
-router.get("/google/callback", googleCallback);
+router.post("/google-login", googleLogin);
+
 router.post("/register", manualRegister);
+router.post("/adminlogin", adminLogin);
 
 export default router;

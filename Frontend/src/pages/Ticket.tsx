@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
-import axios from "axios";
-import { Box, Center, Heading, Image, Text, VStack } from "@chakra-ui/react";
+import { Box, Center, Heading, Image, Text, VStack } from "../ui/UIlibraries";
+import { getTicket } from "../services/api";
 
 interface ITicket {
   _id: string;
@@ -28,12 +28,11 @@ const Ticket = () => {
   useEffect(() => {
     const fetchTicket = async () => {
 
-      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
       try {
-        const res = await axios.get(
-          `${BACKEND_URL}/api/tickets/${id}`
-        );
-        setTicket(res.data);
+        if (id) {
+          const res = await getTicket(id);
+          setTicket(res.data);
+        }
       } catch (err: any) {
         console.error("Failed to fetch ticket:", err.response?.data || err.message);
       }
