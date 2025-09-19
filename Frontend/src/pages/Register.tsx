@@ -34,34 +34,46 @@ const Register = () => {
     resolver: zodResolver(registerSchema),
   });
 
-  const onSubmit = async (data: FormData) => {
-    try {
-      const response = await registerUser(data);
-      const ticketId = response.ticket?._id;
-      if (!ticketId) throw new Error("Ticket ID not found");
+const onSubmit = async (data: FormData) => {
+  console.log("Submitting manual registration with data:", data);
+  try {
+    const response = await registerUser(data);
+    console.log("Manual registration response:", response);
 
-      toast.success("QR code sent to your email!", { position: "top-right", autoClose: 3000 });
-      navigate(`/ticket/${ticketId}?showQR=true`);
-    } catch (err: any) {
-      const msg = err.response?.data?.msg || err.message || "Please try again";
-      if (msg === "User already exists") toast.info("Try another email", { position: "top-right", autoClose: 3000 });
-      else toast.error(msg, { position: "top-right", autoClose: 3000 });
-    }
-  };
+    const ticketId = response.ticket?._id;
+    console.log("Extracted ticketId:", ticketId);
 
-  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
-    try {
-      // send credentialResponse.credential to backend to get ticket
-      const response = await registerUser({ googleToken: credentialResponse.credential });
-      const ticketId = response.ticketId;
-      if (!ticketId) throw new Error("Ticket ID not found");
+    if (!ticketId) throw new Error("Ticket ID not found");
 
-      toast.success("QR code sent to your email!", { position: "top-right", autoClose: 3000 });
-      navigate(`/ticket/${ticketId}?showQR=true`);
-    } catch (err: any) {
-      toast.error(err.message || "Google registration failed", { position: "top-right", autoClose: 3000 });
-    }
-  };
+    toast.success("QR code sent to your email!", { position: "top-right", autoClose: 3000 });
+    navigate(`/ticket/${ticketId}?showQR=true`);
+  } catch (err: any) {
+    console.error("Manual registration error:", err);
+    const msg = err.response?.data?.msg || err.message || "Please try again";
+    if (msg === "User already exists") toast.info("Try another email", { position: "top-right", autoClose: 3000 });
+    else toast.error(msg, { position: "top-right", autoClose: 3000 });
+  }
+};
+
+const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+  console.log("Google credential received:", credentialResponse);
+  try {
+    const response = await registerUser({ googleToken: credentialResponse.credential });
+    console.log("Google registration response:", response);
+
+    const ticketId = response.ticketId;
+    console.log("Extracted ticketId from Google response:", ticketId);
+
+    if (!ticketId) throw new Error("Ticket ID not found");
+
+    toast.success("QR code sent to your email!", { position: "top-right", autoClose: 3000 });
+    navigate(`/ticket/${ticketId}?showQR=true`);
+  } catch (err: any) {
+    console.error("Google registration error:", err);
+    toast.error(err.message || "Google registration failed", { position: "top-right", autoClose: 3000 });
+  }
+};
+
 
   const handleGoogleError = () => {
     toast.error("Google sign-in failed", { position: "top-right", autoClose: 3000 });

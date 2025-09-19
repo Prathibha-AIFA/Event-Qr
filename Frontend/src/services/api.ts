@@ -8,16 +8,21 @@ const api = axios.create({
 
 // Modified registerUser to support Google OAuth
 export const registerUser = async (data: any) => {
-  if (data.googleToken) {
-    // Google registration
-    const res = await api.post("/api/auth/google-login", { token: data.googleToken });
-    return res.data;
-  } else {
-    // Manual registration
-    const res = await api.post("/api/auth/register", data);
-    return res.data;
+  try {
+    let res;
+    if (data.googleToken) {
+      res = await api.post("/api/auth/google-login", { token: data.googleToken });
+    } else {
+      res = await api.post("/api/auth/register", data);
+    }
+    console.log("registerUser received response:", res);
+    return res.data; // this is what the frontend sees
+  } catch (err: any) {
+    console.error("registerUser error:", err.response || err.message);
+    throw err;
   }
 };
+
 
 // Other APIs remain unchanged
 export const getTicket = (id: string) => api.get(`/api/tickets/${id}`);

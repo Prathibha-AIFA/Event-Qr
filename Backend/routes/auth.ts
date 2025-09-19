@@ -3,10 +3,7 @@ import {  adminLogin, manualRegister, googleLogin } from "../controllers/authCon
 
 const router = Router();
 
-router.post("/google-login", (req, res) => {
-  console.log("Google login route hit!");
-  res.json({ msg: "ok" });
-});
+router.post("/google-login", googleLogin);
 
 router.post("/register", manualRegister);
 router.post("/adminlogin", adminLogin);
