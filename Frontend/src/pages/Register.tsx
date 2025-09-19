@@ -121,7 +121,7 @@ const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
 
           <Text textAlign="center" color="gray.500">— or —</Text>
 
-          <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleError} width={300} />
+          <GoogleLogin  onSuccess={handleGoogleSuccess} onError={handleGoogleError} width={300} />
 
           <Text fontSize="sm" color="gray.600">
             <ChakraLink as={Link} to="/login" color="blue.500" fontWeight="bold">

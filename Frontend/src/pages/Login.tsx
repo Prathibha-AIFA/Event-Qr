@@ -55,9 +55,9 @@ const Login = () => {
       navigate("/dashboard");
     } catch (err: any) {
       toast.error(
-        err?.response?.data?.msg || err.message || "Login Failed",
-        { position: "top-right", autoClose: 3000 }
-      );
+  err?.response?.data?.msg || err.message || "Login Failed",
+  { position: "top-right", autoClose: 3000 }
+);
     }
   };
 
