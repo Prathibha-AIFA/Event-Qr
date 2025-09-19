@@ -16,7 +16,7 @@ app.use(cors());
 
 // API routes
 app.use("/api/auth", authRoutes);
-app.use("/", authRoutes);
+
 app.use("/api/tickets", ticketRoutes);
 app.use('/api/admin', adminRoutes)
 
