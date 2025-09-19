@@ -53,7 +53,7 @@ const Register = () => {
     try {
       // send credentialResponse.credential to backend to get ticket
       const response = await registerUser({ googleToken: credentialResponse.credential });
-      const ticketId = response.ticket?._id;
+      const ticketId = response.ticketId;
       if (!ticketId) throw new Error("Ticket ID not found");
 
       toast.success("QR code sent to your email!", { position: "top-right", autoClose: 3000 });
@@ -109,7 +109,7 @@ const Register = () => {
 
           <Text textAlign="center" color="gray.500">— or —</Text>
 
-          <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleError} width="100%" />
+          <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleError} width={300} />
 
           <Text fontSize="sm" color="gray.600">
             <ChakraLink as={Link} to="/login" color="blue.500" fontWeight="bold">
