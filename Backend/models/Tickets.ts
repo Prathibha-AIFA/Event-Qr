@@ -1,9 +1,11 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface ITicket extends Document {
-  userId: Schema.Types.ObjectId;
+  userId: Schema.Types.ObjectId | { name: string; email: string }; // populated
   eventId: string;
-  qrCodeData: "";
+  qrCodeData: string;
+  name?: string;  // optional, fallback from ticket
+  email?: string; // optional, fallback from ticket
 }
 
 const TicketSchema: Schema = new Schema({

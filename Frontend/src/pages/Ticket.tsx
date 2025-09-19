@@ -46,9 +46,18 @@ const Ticket = () => {
         <Text fontSize="lg">Loading ticket...</Text>
       </Center>
     );
+const isUserPopulated = (user: any): user is { name: string; email: string } =>
+  user && typeof user === "object" && "name" in user && "email" in user;
 
-  const userName = ticket.userId?.name || ticket.name || "Unknown";
-  const userEmail = ticket.userId?.email || ticket.email || "Unknown";
+const userName = isUserPopulated(ticket.userId)
+  ? ticket.userId.name
+  : ticket.name || "Unknown";
+
+const userEmail = isUserPopulated(ticket.userId)
+  ? ticket.userId.email
+  : ticket.email || "Unknown";
+
+
 
   return (
     <Center minH="100vh" bg="gray.100" px={4}>
