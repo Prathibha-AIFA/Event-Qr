@@ -16,8 +16,16 @@ router.get("/:id", async (req, res) => {
       eventId: ticket.eventId,
       qrCodeData: ticket.qrCodeData,
       userId: ticket.userId,
-      name: ticket.userId?.name, 
-      email: ticket.userId?.email,
+      name:
+    ticket.name ||
+    (ticket.userId && typeof ticket.userId !== "string" && "name" in ticket.userId
+      ? ticket.userId.name
+      : undefined),
+  email:
+    ticket.email ||
+    (ticket.userId && typeof ticket.userId !== "string" && "email" in ticket.userId
+      ? ticket.userId.email
+      : undefined),
     };
 
     res.json(ticketData);
