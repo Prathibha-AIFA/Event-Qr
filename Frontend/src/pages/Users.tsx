@@ -1,3 +1,4 @@
+// src/pages/Dashboard/Users.tsx
 import { useEffect, useState } from "react";
 import {
   Box,
@@ -23,11 +24,11 @@ interface IUser {
   email: string;
   ticketUrl: string;
   ticketId: string; // must have ticketId for scanning
-  scanned?: boolean;
+  scanned?: boolean; // scan status
 }
 
 interface UsersProps {
-  onScan: (ticketId: string) => Promise<void>;
+  onScan: (ticketId: string) => Promise<void>; // parent prop for scanning
 }
 
 export default function Users({ onScan }: UsersProps) {
@@ -35,6 +36,7 @@ export default function Users({ onScan }: UsersProps) {
   const [loading, setLoading] = useState(false);
   const [scanningId, setScanningId] = useState<string | null>(null);
 
+  // Fetch users from backend
   const loadUsers = async () => {
     try {
       setLoading(true);
@@ -42,7 +44,7 @@ export default function Users({ onScan }: UsersProps) {
       setUsers(
         data.map((u: IUser) => ({
           ...u,
-          scanned: u.scanned ?? false,
+          scanned: u.scanned ?? false, // default false
         }))
       );
     } catch (err: any) {
@@ -52,10 +54,11 @@ export default function Users({ onScan }: UsersProps) {
     }
   };
 
+  // Handle scan click
   const handleScanClick = async (ticketId: string, userId: string) => {
     try {
       setScanningId(userId);
-      await onScan(ticketId); // use ticketId, not userId
+      await onScan(ticketId); // call parent handler
       setUsers((prev) =>
         prev.map((u) => (u._id === userId ? { ...u, scanned: true } : u))
       );
@@ -126,9 +129,11 @@ export default function Users({ onScan }: UsersProps) {
                       {user.scanned ? "Scanned" : "Not Scanned"}
                     </Badge>
                   </Flex>
+
                   <Text color="gray.600" isTruncated>
                     {user.email}
                   </Text>
+
                   <Flex justify="space-between" mt={3} align="center">
                     <Link
                       href={user.ticketUrl}
@@ -139,6 +144,7 @@ export default function Users({ onScan }: UsersProps) {
                     >
                       View Ticket
                     </Link>
+
                     {!user.scanned && user.ticketId && (
                       <Button
                         size="sm"
