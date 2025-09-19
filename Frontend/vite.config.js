@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://event-qr-backend.onrender.com',
+        target: 'https://event-qr-1.onrender.com',
         changeOrigin: true,
         secure: false,
       },
