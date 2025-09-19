@@ -24,7 +24,7 @@ const loginSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-// ✅ Type for form data
+//  Type for form data
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login = () => {

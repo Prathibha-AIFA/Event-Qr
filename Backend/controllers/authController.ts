@@ -132,38 +132,50 @@ export const manualRegister = async (req: Request, res: Response) => {
 };
 
 
+
+
 export const adminLogin = (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  // Step 1: Check if email and password are provided
-  if (!email || !password) {
-    return res.status(400).json({ msg: "Email and password are required" });
-  }
+    if (!email || !password) {
+      return res.status(400).json({ msg: "Email and password are required" });
+    }
 
-  // Step 2: Read admin data from db.json
-  const dbPath = path.join(__dirname, "../db.json");
-  const rawData = fs.readFileSync(dbPath, "utf-8");
-  const data = JSON.parse(rawData);
-  const admins: Admin[] = data.admins;
+    // ✅ Use process.cwd() so path works in production too
+    const dbPath = path.join(process.cwd(), "db.json");
 
-  // Step 3: Find matching admin
-  const matchedAdmin = admins.find(
-    (admin) => admin.email === email && admin.password === password
-  );
+    if (!fs.existsSync(dbPath)) {
+      console.error("db.json not found at", dbPath);
+      return res.status(500).json({ msg: "Database file missing in production" });
+    }
 
-  // Step 4: Respond based on match
-  if (matchedAdmin) {
-    return res.status(200).json({
-      msg: "Login successful",
-      admin: {
-        name: matchedAdmin.name,
-        email: matchedAdmin.email,
-      },
-    });
-  } else {
-    return res.status(401).json({ msg: "Invalid credentials" });
+    const rawData = fs.readFileSync(dbPath, "utf-8");
+    const data = JSON.parse(rawData);
+    const admins = data.admins || [];
+
+    const matchedAdmin = admins.find(
+      (admin: any) => admin.email === email && admin.password === password
+    );
+
+    if (matchedAdmin) {
+      return res.status(200).json({
+        msg: "Login successful",
+        admin: {
+          name: matchedAdmin.name,
+          email: matchedAdmin.email,
+        },
+        token: "dummyToken123", // optional
+      });
+    } else {
+      return res.status(401).json({ msg: "Invalid credentials" });
+    }
+  } catch (err: any) {
+    console.error("Admin login error:", err.message || err);
+    return res.status(500).json({ msg: "Internal server error" });
   }
 };
+
 
 
 
