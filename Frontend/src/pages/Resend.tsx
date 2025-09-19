@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Box, Table, Thead, Tbody, Tr, Th, Td, Button, Spinner, Text } from "@chakra-ui/react";
 import { toast } from "react-toastify";
 import { fetchUsersForResend, resendEmail } from "../services/api"; // import helpers
+import DashboardLayout from "../components/DashboardLayout";
 
 interface IUser {
   _id: string;
@@ -46,6 +47,7 @@ export default function Resend() {
   if (loading) return <Spinner size="xl" />;
 
   return (
+ 
     <Box p={6}>
       <Text fontSize="2xl" mb={4} fontWeight="bold">
         Resend Emails
@@ -78,5 +80,6 @@ export default function Resend() {
         </Tbody>
       </Table>
     </Box>
+  
   );
 }

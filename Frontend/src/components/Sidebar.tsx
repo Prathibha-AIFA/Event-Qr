@@ -1,44 +1,41 @@
-import React, { useRef, useState } from "react";
-import { VStack, Box, Text, Icon, Button,   } from "@chakra-ui/react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { FiHome, FiUsers, FiMail, FiLogOut } from "react-icons/fi";
+// src/components/Sidebar.tsx
+import React from "react";
+import { VStack, Box, Text, Icon } from "@chakra-ui/react";
+import { FiHome, FiUsers, FiMail } from "react-icons/fi";
+
+type SidebarProps = {
+  active?: string;
+  onSectionChange?: (section: "overview" | "users" | "resend") => void;
+};
 
 const links = [
-  { name: "Dashboard", path: "/dashboard", icon: FiHome },
-  { name: "Users", path: "/dashboard/users", icon: FiUsers },
-  { name: "Resend Emails", path: "/dashboard/resend", icon: FiMail },
-  
+  { name: "Dashboard", key: "overview", icon: FiHome },
+  { name: "Users", key: "users", icon: FiUsers },
+  { name: "Resend Emails", key: "resend", icon: FiMail },
 ];
 
-export default function Sidebar() {
-  const location = useLocation();
+export default function Sidebar({ active, onSectionChange }: SidebarProps) {
   return (
-    <>
-      <Box w="250px" bg="white" p={6} borderRight="1px solid" borderColor="gray.200">
-        <VStack spacing={4} align="stretch">
-          {links.map(link =>
-             (
-              <Link key={link.name} to={link.path}>
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  p={2}
-                  borderRadius="md"
-                  bg={location.pathname === link.path ? "blue.100" : "transparent"}
-                  _hover={{ bg: "blue.50" }}
-                >
-                  <Icon as={link.icon} mr={3} />
-                  <Text fontWeight={location.pathname === link.path ? "bold" : "normal"}>
-                    {link.name}
-                  </Text>
-                </Box>
-              </Link>
-            )
-          )}
-        </VStack>
-      </Box>
-
-     
-    </>
+    <Box w="250px" bg="white" p={6} borderRight="1px solid" borderColor="gray.200">
+      <VStack spacing={4} align="stretch">
+        {links.map((link) => (
+          <Box
+            key={link.key}
+            display="flex"
+            alignItems="center"
+            p={2}
+            borderRadius="md"
+            bg={active === link.key ? "blue.100" : "transparent"}
+            _hover={{ bg: "blue.50", cursor: "pointer" }}
+            onClick={() => onSectionChange?.(link.key as "overview" | "users" | "resend")}
+          >
+            <Icon as={link.icon} mr={3} />
+            <Text fontWeight={active === link.key ? "bold" : "normal"}>
+              {link.name}
+            </Text>
+          </Box>
+        ))}
+      </VStack>
+    </Box>
   );
 }

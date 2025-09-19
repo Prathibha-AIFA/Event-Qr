@@ -1,3 +1,4 @@
+// src/components/Navbar.tsx
 import React, { useRef } from "react";
 import {
   Flex,
@@ -13,16 +14,15 @@ import {
   AlertDialogOverlay,
   useDisclosure,
 } from "../ui/UIlibraries";
-import { useNavigate } from "react-router-dom";
 
 type NavbarProps = {
   title: string;
+  onSectionChange?: (section: "overview" | "users" | "resend") => void;
 };
 
-export default function Navbar({ title }: NavbarProps) {
+export default function Navbar({ title, onSectionChange }: NavbarProps) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef<HTMLButtonElement>(null);
-  const navigate = useNavigate();
 
   const handleLogoutClick = () => {
     onOpen(); // open confirmation modal
@@ -30,15 +30,18 @@ export default function Navbar({ title }: NavbarProps) {
 
   const confirmLogout = () => {
     onClose();
-    navigate("/"); 
+    // 🔴 Instead of navigate("/") we just reload or clear session
+    // If you *do* want to go back to login page, keep navigate("/") here
+    window.location.href = "/";
   };
 
   return (
     <Flex w="100%" bg="white" p={4} boxShadow="sm" align="center">
-      <Text fontSize="xl" fontWeight="bold">
+      <Text fontSize="xl" fontWeight="bold" cursor="pointer" onClick={() => onSectionChange?.("overview")}>
         {title}
       </Text>
       <Spacer />
+
       <Avatar name="Admin" size="sm" mr={4} />
       <Button colorScheme="red" size="sm" onClick={handleLogoutClick}>
         Logout

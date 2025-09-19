@@ -1,20 +1,25 @@
+// src/controllers/dashboardController.ts
 import { Request, Response } from "express";
 import User from "../models/User";
 import Ticket from "../models/Tickets";
 import { sendEmail } from "../utils/sendEmail";
 
-
+// ✅ Dashboard counts including scanned tickets
 export const getDashboardCounts = async (req: Request, res: Response) => {
   try {
     const totalUsers = await User.countDocuments();
     const totalTickets = await Ticket.countDocuments();
+    const totalScans = await Ticket.countDocuments({ scanned: true }); // NEW
 
-    res.json({ totalUsers, totalTickets });
+    res.json({ totalUsers, totalTickets, totalScans });
   } catch (err) {
-    res.status(500).json({ msg: "Failed to fetch dashboard counts", error: err });
+    res
+      .status(500)
+      .json({ msg: "Failed to fetch dashboard counts", error: err });
   }
 };
 
+// ✅ Fetch all users with their tickets + QR data
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
     const users = await User.find().lean();
@@ -27,6 +32,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
           ...user,
           ticketUrl: ticket ? `/ticket/${ticket._id}` : null,
           qrCodeData: ticket ? ticket.qrCodeData : null,
+          scanned: ticket ? ticket.scanned : false, // NEW
         };
       })
     );
@@ -38,7 +44,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
   }
 };
 
-// Resend email to a specific user
+// ✅ Resend email to a specific user with QR code
 export const resendEmailToUser = async (req: Request, res: Response) => {
   const { userId } = req.params;
 
@@ -49,7 +55,9 @@ export const resendEmailToUser = async (req: Request, res: Response) => {
     const ticket = await Ticket.findOne({ userId: user._id });
     if (!ticket) return res.status(404).json({ msg: "Ticket not found" });
 
-    const ticketUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/ticket/${ticket._id}`;
+    const ticketUrl = `${
+      process.env.FRONTEND_URL || "http://localhost:5173"
+    }/ticket/${ticket._id}`;
 
     await sendEmail(
       user.email,

@@ -3,7 +3,8 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface IUser extends Document {
   name: string;
   email: string;
-  googleId?: string; // optional for manual users
+  googleId?: string;
+   // optional for manual users
 }
 
 const UserSchema: Schema = new Schema(
