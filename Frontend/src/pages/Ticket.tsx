@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import { Box, Center, Heading, Image, Text, VStack } from "../ui/UIlibraries";
 import { getTicket } from "../services/api";
+import { scanTicket } from "../services/api";
 
 interface ITicket {
   _id: string;
@@ -25,20 +26,26 @@ const Ticket = () => {
   const queryParams = new URLSearchParams(location.search);
   const showQR = queryParams.get("showQR") === "true";
 
-  useEffect(() => {
-    const fetchTicket = async () => {
 
-      try {
-        if (id) {
-          const res = await getTicket(id);
-          setTicket(res.data);
-        }
-      } catch (err: any) {
-        console.error("Failed to fetch ticket:", err.response?.data || err.message);
+
+useEffect(() => {
+  const fetchTicket = async () => {
+    try {
+      if (id) {
+        const res = await getTicket(id);
+        setTicket(res.data);
+
+        // ✅ Mark ticket as scanned when opened via QR
+        await scanTicket(id);
       }
-    };
-    if (id) fetchTicket();
-  }, [id]);
+    } catch (err: any) {
+      console.error("Failed to fetch ticket:", err.response?.data || err.message);
+    }
+  };
+
+  if (id) fetchTicket();
+}, [id]);
+
 
   if (!ticket)
     return (
