@@ -58,7 +58,7 @@ export default function Users({ onScan }: UsersProps) {
   const handleScanClick = async (ticketId: string, userId: string) => {
     try {
       setScanningId(userId);
-      await onScan(ticketId); // call parent handler
+      await onScan(ticketId); 
       setUsers((prev) =>
         prev.map((u) => (u._id === userId ? { ...u, scanned: true } : u))
       );
@@ -88,81 +88,91 @@ export default function Users({ onScan }: UsersProps) {
       </Center>
     );
 
-  return (
-    <Box px={{ base: 4, md: 12 }} py={6}>
-      <Heading size="lg" mb={6}>
-        Users Info
-      </Heading>
+return (
+  <Box px={{ base: 4, md: 12 }} py={6} bg="gray.50" minH="100vh">
+    <Heading size="lg" mb={8} textAlign="center">
+      Users Info
+    </Heading>
 
-      <Flex wrap="wrap" gap={6}>
-        {users.map((user) => (
-          <Card
-            key={user._id}
-            borderWidth="1px"
-            borderRadius="2xl"
-            flex="1 1 300px"
-            minW="280px"
-            maxW="350px"
-            p={4}
-            bg="white"
-            boxShadow="sm"
-            _hover={{
-              boxShadow: "xl",
-              transform: "translateY(-4px)",
-              transition: "all 0.3s",
-            }}
-          >
-            <CardBody>
-              <Flex align="center" gap={4}>
-                <Avatar name={user.name} size="lg" />
-                <Stack spacing={2} flex="1">
-                  <Flex justify="space-between" align="center">
-                    <Heading size="md" isTruncated>
-                      {user.name}
-                    </Heading>
-                    <Badge
-                      colorScheme={user.scanned ? "green" : "red"}
-                      fontSize="0.75em"
-                      px={2}
-                      py={1}
-                    >
-                      {user.scanned ? "Scanned" : "Not Scanned"}
-                    </Badge>
-                  </Flex>
+    <Flex wrap="wrap" gap={8} justify="center">
+      {users.map((user) => (
+        <Card
+          key={user._id}
+          borderWidth="1px"
+          borderRadius="2xl"
+          flex="1 1 300px"
+          minW="280px"
+          maxW="340px"
+          h="100%"
+          bg="white"
+          shadow="md"
+          transition="all 0.25s"
+          _hover={{
+            shadow: "2xl",
+            transform: "translateY(-6px) scale(1.02)",
+          }}
+        >
+          <CardBody display="flex" flexDirection="column" h="100%">
+            {/* Header */}
+            <Flex align="center" mb={4} gap={4}>
+              <Avatar name={user.name} size="lg" />
+              <Stack spacing={1} flex="1" minW={0}>
+                <Heading size="md" noOfLines={1}>
+                  {user.name}
+                </Heading>
+                <Text color="gray.600" fontSize="sm" noOfLines={1}>
+                  {user.email}
+                </Text>
+              </Stack>
+            </Flex>
 
-                  <Text color="gray.600" isTruncated>
-                    {user.email}
-                  </Text>
+            {/* Badge */}
+            <Center mb={4}>
+              <Badge
+                px={3}
+                py={1}
+                rounded="full"
+                colorScheme={user.scanned ? "green" : "red"}
+                fontSize="0.8em"
+                fontWeight="semibold"
+              >
+                {user.scanned ? "✅ Scanned" : "❌ Not Scanned"}
+              </Badge>
+            </Center>
 
-                  <Flex justify="space-between" mt={3} align="center">
-                    <Link
-                      href={user.ticketUrl}
-                      color="blue.500"
-                      isExternal
-                      fontWeight="medium"
-                      noOfLines={1}
-                    >
-                      View Ticket
-                    </Link>
+            {/* Footer actions */}
+            <Flex mt="auto" justify="space-between" align="center" pt={4}>
+              <Link
+                href={user.ticketUrl}
+                color="blue.600"
+                fontWeight="medium"
+                fontSize="sm"
+                isExternal
+                noOfLines={1}
+                _hover={{ textDecoration: "underline" }}
+              >
+                🎟️ View Ticket
+              </Link>
 
-                    {!user.scanned && user.ticketId && (
-                      <Button
-                        size="sm"
-                        colorScheme="green"
-                        isLoading={scanningId === user._id}
-                        onClick={() => handleScanClick(user.ticketId, user._id)}
-                        ml={2}
-                      >
-                        Scan QR
-                      </Button>
-                    )}
-                  </Flex>
-                </Stack>
-              </Flex>
-            </CardBody>
-          </Card>
-        ))}
-      </Flex>
-    </Box>
-  );
+              {!user.scanned && user.ticketId && (
+                <Button
+                  size="sm"
+                  colorScheme="green"
+                  isLoading={scanningId === user._id}
+                  onClick={() => handleScanClick(user.ticketId, user._id)}
+                  rounded="full"
+                  shadow="sm"
+                  _hover={{ shadow: "md" }}
+                >
+                  Scan QR
+                </Button>
+              )}
+            </Flex>
+          </CardBody>
+        </Card>
+      ))}
+    </Flex>
+  </Box>
+);
+
 }
